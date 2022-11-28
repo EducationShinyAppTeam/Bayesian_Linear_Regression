@@ -6,9 +6,87 @@ library(boastUtils)
 library(psych)
 library(ggplot2)
 library(dplyr)
-library(rstanarm)
+# library(rstanarm)
 library(Metrics)
 library(ggpubr)
+# Add On
+library(rstan)
+library(shinystan)
+library(bayesplot)
+library(RcppParallel)
+
+# Test
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/as.matrix.stanreg.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/bayes_R2.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/data_block.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/jm_data_block.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/jm_make_assoc_parts.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/jm_make_assoc_terms.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/launch_shinystan.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/log_lik.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/loo-kfold.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/loo-prediction.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/loo.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/misc.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/neg_binomial_2.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/plots.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/posterior_interval.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/posterior_linpred.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/posterior_predict.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/posterior_survfit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/posterior_traj.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/posterior_vs_prior.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/pp_check.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/pp_data.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/pp_validate.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/predict.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/predictive_error.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/predictive_interval.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/print-and-summary.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/prior_summary.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/priors.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/ps_check.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/simulate_b_pars.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_aov.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_betareg.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_betareg.fit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_biglm.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_biglm.fit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_clogit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_gamm4.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_glm.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_glm.fit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_glmer.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_jm.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_jm.fit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_lm.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_lm.fit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_mvmer.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_nlmer.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_polr.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stan_polr.fit.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanmodels.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanmvreg-methods.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanmvreg.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanreg.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanreg-methods.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanreg-objects.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanreg_list.R")
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/zzz.R")
+
+
+
+prior_summary <- function(object, ...){
+  UseMethod("prior_summary")
+}
+
+posterior_predict <- function(object, ...){
+  UseMethod("posterior_predict")
+}
+
+posterior_linpred <- function(object, transform = FALSE, ...) {
+  UseMethod("posterior_linpred")
+}
 # Define UI for App ----
 ui <- list(
   ## Create the app page ----
@@ -55,17 +133,17 @@ ui <- list(
           tabName = "overview",
           withMathJax(),
           h1("Bayesian Linear Regression"), # This should be the full name.
-          p("This app introduces the concept of Bayesian linear regression. 
-            We will compare the Simple linear regression (using ordinary least 
-            squares (OLS) technique to find the best-fitting line for a set of data points) 
-            with Bayesian linear regression, and see some results applied to simple 
+          p("This app introduces the concept of Bayesian linear regression.
+            We will compare the Simple linear regression (using ordinary least
+            squares (OLS) technique to find the best-fitting line for a set of data points)
+            with Bayesian linear regression, and see some results applied to simple
             datasets."),
           h2("Instructions"),
-          p("In order to use this app more effectively, it is recommended to 
+          p("In order to use this app more effectively, it is recommended to
             explore in the following order."),
           tags$ol(
             tags$li("Review prerequistes using the Prerequistes tab."),
-            tags$li("Enter the Explore page and compare the results of 
+            tags$li("Enter the Explore page and compare the results of
                     Bayesian method and traditional method.")
           ),
           ##### Go prere
@@ -104,15 +182,15 @@ ui <- list(
           p("In order to get the most out of this app, please review the
             following:"),
           tags$ul(
-            tags$li("Ordinary least squares (OLS) is a method for fitting the 
-                    model parameters by minimizing the residual sum of squares (RSS). 
-                    RSS is the total of the squared differences between the actual 
+            tags$li("Ordinary least squares (OLS) is a method for fitting the
+                    model parameters by minimizing the residual sum of squares (RSS).
+                    RSS is the total of the squared differences between the actual
                     values (y) and the predicted model outputs."),
-            tags$li("Bayesian linear regression is an approach to linear regression 
-                    in which the statistical analysis is undertaken within the 
-                    context of Bayesian inference. The aim of Bayesian Linear 
-                    Regression is not to find the single “best” value of the model 
-                    parameters, but rather to determine the posterior distribution 
+            tags$li("Bayesian linear regression is an approach to linear regression
+                    in which the statistical analysis is undertaken within the
+                    context of Bayesian inference. The aim of Bayesian Linear
+                    Regression is not to find the single “best” value of the model
+                    parameters, but rather to determine the posterior distribution
                     for the model parameters.")
           ),
           br(),
@@ -133,16 +211,16 @@ ui <- list(
           tabName = "example",
           h2("Example"),
           withMathJax(
-            p("We have 700 students' SAT Verbal and SAT Quantitative 
-              self-report scores. We want to study whether there is a 
-              linear relationship between SAT Verbal scores and SAT 
-              Quantitative scores. The expression is: 
+            p("We have 700 students' SAT Verbal and SAT Quantitative
+              self-report scores. We want to study whether there is a
+              linear relationship between SAT Verbal scores and SAT
+              Quantitative scores. The expression is:
               $$SATQ = \\beta_0 + \\beta_1SATV +\\epsilon$$")
           ),
-          p("The following graph shows OLS and BLR model. With OLS, we get a single 
-            estimate with 95% confidence interval for the model parameters, the 
-            intercept and slope here. With BLR, we get posterior distributions of 
-            parameters, intercept, slope and sigma here. And we explore 100 
+          p("The following graph shows OLS and BLR model. With OLS, we get a single
+            estimate with 95% confidence interval for the model parameters, the
+            intercept and slope here. With BLR, we get posterior distributions of
+            parameters, intercept, slope and sigma here. And we explore 100
             possible models drawn from the model parameter posteriors."),
           br(),
           fluidPage(
@@ -157,7 +235,7 @@ ui <- list(
               wellPanel(
                 checkboxInput(
                   inputId = "olsband",
-                  label = "Show 95% confidence band", 
+                  label = "Show 95% confidence band",
                   value = FALSE
                 )
               )
@@ -169,7 +247,7 @@ ui <- list(
               plotOutput("olsfit"),
               checkboxInput(
                 inputId = "olsparaC",
-                label = "Results table", 
+                label = "Results table",
                 value = FALSE
               ),
               conditionalPanel(
@@ -253,7 +331,7 @@ ui <- list(
               plotOutput("blrfit"),
               checkboxInput(
                 inputId = "blrparaC",
-                label = "Results table", 
+                label = "Results table",
                 value = FALSE
               ),
               conditionalPanel(
@@ -262,7 +340,7 @@ ui <- list(
               ),
               checkboxInput(
                 inputId = "blrparaplotC",
-                label = "Show prior and posterior distributions of parameters", 
+                label = "Show prior and posterior distributions of parameters",
                 value = FALSE
               ),
               conditionalPanel(
@@ -277,19 +355,19 @@ ui <- list(
           tabName = "ols",
           h2("Explore Ordinary Least Squares regression prediction results"),
           withMathJax(
-            p("We have 700 students' SAT Verbal and SAT Quantitative self-report scores. 
-              We want to study whether there is a linear relationship between SAT 
-              Verbal scores and SAT Quantitative scores. The expression is: 
+            p("We have 700 students' SAT Verbal and SAT Quantitative self-report scores.
+              We want to study whether there is a linear relationship between SAT
+              Verbal scores and SAT Quantitative scores. The expression is:
               $$SATQ = \\beta_0 + \\beta_1SATV +\\epsilon$$")),
-          p("Explore the prediction results of the OLS method. Use the slider 
-              to select the proportion of data in the training set and select 
-              the SAT verbal scores you want to use to predict SAT quantitative 
-              scores. We will show the results predicted by the OLS method with 
-              the 95% confidence interval.In the two plots, you will find that 
-              once the training set is selected, the prediction curve for average 
-              verbal will be fixed (black one), but as the verbal you select 
+          p("Explore the prediction results of the OLS method. Use the slider
+              to select the proportion of data in the training set and select
+              the SAT verbal scores you want to use to predict SAT quantitative
+              scores. We will show the results predicted by the OLS method with
+              the 95% confidence interval.In the two plots, you will find that
+              once the training set is selected, the prediction curve for average
+              verbal will be fixed (black one), but as the verbal you select
               changes, the prediction curve for it will also change (blue one)."),
-          
+
           fluidPage(
             #####input----
             column(
@@ -314,7 +392,7 @@ ui <- list(
                 ),
                 checkboxInput(
                   inputId = "olsbandpre",
-                  label = "Show 95% confidence band", 
+                  label = "Show 95% confidence band",
                   value = FALSE
                 ),
                 bsButton(
@@ -336,7 +414,7 @@ ui <- list(
               plotOutput("olsfitpre"),
               checkboxInput(
                 inputId = "olsparapreC",
-                label = "Results table", 
+                label = "Results table",
                 value = FALSE
               ),
               conditionalPanel(
@@ -359,19 +437,19 @@ ui <- list(
           tabName = "bayesian",
           h2("Explore Bayesian linear regression prediction results"),
           withMathJax(
-            p("We have 700 students' SAT Verbal and SAT Quantitative self-report scores. 
-              We want to study whether there is a linear relationship between SAT 
-              Verbal scores and SAT Quantitative scores. The expression is: 
+            p("We have 700 students' SAT Verbal and SAT Quantitative self-report scores.
+              We want to study whether there is a linear relationship between SAT
+              Verbal scores and SAT Quantitative scores. The expression is:
               $$SATQ = \\beta_0 + \\beta_1SATV +\\epsilon$$")),
-          p("Explore the prediction results of the BLR model. 
-              Use the slider to select the proportion of data in the training set, 
-              and select the prior distribution for Bayesian regression. Then 
-              select the SAT verbal scores you want to use to predict SAT quantitative 
-              scores. We will show the results predicted by the BLR method and 
-              the 95% credible interval.In the two plots, you will find that 
-              once the training set is selected, the prediction curve for 
-              average verbal will be fixed (black one), but as the verbal you 
-              select changes, the prediction curve for it will also change (blue one)."),  
+          p("Explore the prediction results of the BLR model.
+              Use the slider to select the proportion of data in the training set,
+              and select the prior distribution for Bayesian regression. Then
+              select the SAT verbal scores you want to use to predict SAT quantitative
+              scores. We will show the results predicted by the BLR method and
+              the 95% credible interval.In the two plots, you will find that
+              once the training set is selected, the prediction curve for
+              average verbal will be fixed (black one), but as the verbal you
+              select changes, the prediction curve for it will also change (blue one)."),
           fluidPage(
             #####input----
             column(
@@ -471,7 +549,7 @@ ui <- list(
               plotOutput("blrfitpre"),
               checkboxInput(
                 inputId = "blrparaCpre",
-                label = "Results table", 
+                label = "Results table",
                 value = FALSE
               ),
               conditionalPanel(
@@ -507,7 +585,7 @@ ui <- list(
           ),
           p(
             class = "hangingindent",
-            "Change, W., and Borges Ribeiro, B. (2021). shinydashboard: Create 
+            "Change, W., and Borges Ribeiro, B. (2021). shinydashboard: Create
             dashboards with 'shiny'. (v 0.7.2) [R package]. Available from
             https://CRAN.R-project.org/package=shinydashboard"
           ),
@@ -520,13 +598,13 @@ ui <- list(
           ),
           p(
             class = "hangingindent",
-            "Goodrich, B., Gabry, J., Ali, I., and Brilleman, S. (2022). rstanarm: Bayesian 
+            "Goodrich, B., Gabry, J., Ali, I., and Brilleman, S. (2022). rstanarm: Bayesian
             applied regression modeling via Stan. (v 2.21.3) [R package]. Available
             from https://mc-stan.org/rstanarm/"
           ),
           p(
             class = "hangingindent",
-            "Hamner, B., Michael, F., and LeDell, E. (2022). Metrics: Evaluation Metrics for Machine Learning 
+            "Hamner, B., Michael, F., and LeDell, E. (2022). Metrics: Evaluation Metrics for Machine Learning
             (v 2.2.5) [R package]. Available from https://CRAN.R-project.org/package=Metrics"
           ),
           p(
@@ -536,8 +614,8 @@ ui <- list(
           ),
           p(
             class = "hangingindent",
-            "Revelle, W. (2022). psych: Procedures for Psychological, Psychometric, 
-            and Personality Research. Northwestern University, Evanston, Illinois. 
+            "Revelle, W. (2022). psych: Procedures for Psychological, Psychometric,
+            and Personality Research. Northwestern University, Evanston, Illinois.
             (v 2.2.5) [R package]. Available from https://CRAN.R-project.org/package=psych"
           ),
           p(
@@ -548,8 +626,8 @@ ui <- list(
           ),
           p(
             class = "hangingindent",
-            "Wickham, H., François, R., Henry, L.,and Müller, K. (2022). dplyr: A 
-            Grammar of Data Manipulation. (v 1.0.9).[R package]. Available from 
+            "Wickham, H., François, R., Henry, L.,and Müller, K. (2022). dplyr: A
+            Grammar of Data Manipulation. (v 1.0.9).[R package]. Available from
             https://dplyr.tidyverse.org"
           ),
           br(),
@@ -564,7 +642,7 @@ ui <- list(
 
 # Define server logic ----
 server <- function(input, output, session) {
-  
+
   ## Set up Info button ----
   observeEvent(
     eventExpr = input$info,
@@ -607,7 +685,7 @@ server <- function(input, output, session) {
   ## training set
   trainols<-reactive(na.omit(satFull))
   olsmodel<-reactive(lm(SATQ~SATV,data = trainols()))
-  
+
   output$olsfit<-renderPlot({
     band<-
       if(input$olsband == 1){
@@ -639,7 +717,7 @@ server <- function(input, output, session) {
       band+
       labs(
         title = "Ordinary Least Squares",
-        x = "SAT Verbal", 
+        x = "SAT Verbal",
         y = "SAT Quantitative",
         alt = "The plot shows the linear relationship between sat verbal scores and sat quantitative scores"
       )+
@@ -651,7 +729,7 @@ server <- function(input, output, session) {
       )
     return(p)
   })
-  
+
   output$olspara<-renderTable({
     coeff<-coefficients(olsmodel())
     c2<-paste("95% Confidence interval"," lower bound",sep = "<br>")
@@ -660,7 +738,7 @@ server <- function(input, output, session) {
                    dimnames = list(c("Intercept","SAT Verbal"),c("Estimate",c2,c3)))
   },rownames = TRUE,bordered = TRUE,sanitize.text.function=identity
   )
-  
+
   ### Bayesian----
   ## training set
   trainblr<-reactive(na.omit(satFull))
@@ -678,10 +756,10 @@ server <- function(input, output, session) {
     }
     return(blrmodel)
   })
-  
+
   ## posterior values
   postparas<-reactive(as.data.frame(blrmodel()))
-  
+
   output$defaultpriors<-renderUI({
     validate(
       need(
@@ -701,7 +779,8 @@ server <- function(input, output, session) {
              round(1/pr$prior_aux$adjusted_scale,2),")")
     )
   })
-  
+
+
   output$blrfit<-renderPlot({
     newdata<-sample_n(postparas(),100)
     ggplot()+
@@ -714,9 +793,9 @@ server <- function(input, output, session) {
       geom_segment(
         data = newdata,
         mapping = aes(
-          x= 200, 
+          x= 200,
           xend = 800,
-          y = newdata[,1] + newdata[,2]*200, 
+          y = newdata[,1] + newdata[,2]*200,
           yend = newdata[,1] + newdata[,2]*800
         ),
         color = psuPalette[1],
@@ -725,7 +804,7 @@ server <- function(input, output, session) {
       labs(
         title = "Bayesian Linear Regression",
         subtitle = "* 100 regression lines sampled from posterior distributions",
-        x = "SAT Verbal", 
+        x = "SAT Verbal",
         y = "SAT Quantitative",
         alt = "The plot shows the linear relationship between sat verbal scores and sat quantitative scores"
       )+
@@ -737,7 +816,7 @@ server <- function(input, output, session) {
         axis.title = element_text(size = 16),
       )
   })
-  
+
   output$blrpara<-renderTable({
     c2<-paste("95% Credible interval"," lower bound",sep = "<br>")
     c3<-paste("95% Credible interval"," upper bound",sep = "<br>")
@@ -754,7 +833,7 @@ server <- function(input, output, session) {
       nrow=3,ncol=3,byrow = TRUE,dimnames = list(c("Intercept","SAT Verbal","Sigma"),
                                                  c("Mean",c2,c3)))
   },rownames = TRUE,bordered = TRUE,sanitize.text.function=identity)
-  
+
   output$blrparaplot<-renderPlot({
     ## informative
     if(input$priortype=='informp'){
@@ -784,7 +863,7 @@ server <- function(input, output, session) {
           size=1
         )+
         labs(
-          x = "Intercept", 
+          x = "Intercept",
           y = "Density",
           alt = "The plot combined the prior distribution and the posterior plot"
         )+
@@ -831,7 +910,7 @@ server <- function(input, output, session) {
           size=1
         )+
         labs(
-          x = "Slope", 
+          x = "Slope",
           y = "Density",
           alt = "The plot combined the prior distribution and the posterior plot"
         )+
@@ -844,7 +923,7 @@ server <- function(input, output, session) {
             "Prior" = psuPalette[3],
             "Posterior" = psuPalette[2]
           )
-        )+  
+        )+
         theme_bw()+
         theme(
           plot.caption = element_text(size = 18),
@@ -878,7 +957,7 @@ server <- function(input, output, session) {
           size=1
         )+
         labs(
-          x = "Sigma", 
+          x = "Sigma",
           y = "Density",
           alt = "The plot combined the prior distribution and the posterior plot"
         )+
@@ -905,7 +984,7 @@ server <- function(input, output, session) {
         p = all,
         top = text_grob(
           "Prior and Posterior",
-          color = "black", 
+          color = "black",
           size = 22
         )
       )
@@ -941,7 +1020,7 @@ server <- function(input, output, session) {
           size=1
         )+
         labs(
-          x = "Intercept", 
+          x = "Intercept",
           y = "Density",
           alt = "The plot combined the prior distribution and the posterior plot"
         )+
@@ -988,7 +1067,7 @@ server <- function(input, output, session) {
           size=1
         )+
         labs(
-          x = "Slope", 
+          x = "Slope",
           y = "Density",
           alt = "The plot combined the prior distribution and the posterior plot"
         )+
@@ -1035,7 +1114,7 @@ server <- function(input, output, session) {
           size=1
         )+
         labs(
-          x = "Sigma", 
+          x = "Sigma",
           y = "Density",
           alt = "The plot combined the prior distribution and the posterior plot"
         )+
@@ -1062,14 +1141,14 @@ server <- function(input, output, session) {
         p = all,
         top = text_grob(
           "Prior and Posterior",
-          color = "black", 
+          color = "black",
           size = 22
         )
       )
       return(allt)
     }
   })
-  
+
   ### Reactive sliderinput----
   observeEvent(
     eventExpr = input$trainingsizepreols,
@@ -1081,7 +1160,7 @@ server <- function(input, output, session) {
       )
     }
   )
-  
+
   observeEvent(
     eventExpr = input$trainingsizepreblr,
     handlerExpr = {
@@ -1095,7 +1174,7 @@ server <- function(input, output, session) {
   ### Click times----
   ### the same sample selected each time
   clicktimes<-reactive(input$newsamplepreols+input$newsamplepreblr)
-  
+
   ## OLS Prediction----
   seeds3<-reactiveValues(seedpre=0)
   observeEvent(
@@ -1155,7 +1234,7 @@ server <- function(input, output, session) {
       band+
       labs(
         title = "Ordinary Least Squares",
-        x = "SAT Verbal", 
+        x = "SAT Verbal",
         y = "SAT Quantitative",
         alt = "The plot shows the linear relationship between sat verbal scores and sat quantitative scores"
       )+
@@ -1167,7 +1246,7 @@ server <- function(input, output, session) {
       )
     return(p)
   })
-  
+
   output$olsparapre<-renderTable({
     coeff<-coefficients(olsmodelpre())
     c2<-paste("95% Confidence interval"," lower bound",sep = "<br>")
@@ -1179,7 +1258,7 @@ server <- function(input, output, session) {
       dimnames = list(c("Intercept","SAT Verbal"),c("Estimate",c2,c3)))
   },rownames = TRUE,bordered = TRUE,sanitize.text.function=identity
   )
-  
+
   output$olsestimate<-renderPlot({
     x<-input$xpointols
     newdata<-data.frame(SATV=x)
@@ -1252,7 +1331,7 @@ server <- function(input, output, session) {
       labs(
         title =paste0("OLS Prediction for Mean Verbal vs. Verbal = ",x),
         subtitle = paste0("* Predicted values of SAT Quantitative when SAT Verbal = ",round(mean(trainpreols()$SATV),1)," vs. ",x),
-        x = "Predicted SAT Quantitative Scores", 
+        x = "Predicted SAT Quantitative Scores",
         y = "Density",
         alt = "A plot for the point estimate"
       )+
@@ -1291,7 +1370,7 @@ server <- function(input, output, session) {
     colnames(ctable)<-c(c1,c2)
     ctable
   },bordered = TRUE,sanitize.text.function=identity)
-  
+
   ## BLR Prediction----
   seeds4<-reactiveValues(seedpre=0)
   observeEvent(
@@ -1355,9 +1434,9 @@ server <- function(input, output, session) {
       geom_segment(
         data = newdata,
         mapping = aes(
-          x= min(trainpreblr()$SATV), 
+          x= min(trainpreblr()$SATV),
           xend = max(trainpreblr()$SATV),
-          y = newdata[,1] + newdata[,2]*min(trainpreblr()$SATV), 
+          y = newdata[,1] + newdata[,2]*min(trainpreblr()$SATV),
           yend = newdata[,1] + newdata[,2]*max(trainpreblr()$SATV)
         ),
         color = psuPalette[1],
@@ -1366,7 +1445,7 @@ server <- function(input, output, session) {
       labs(
         title = "Bayesian Linear Regression",
         subtitle = "* 100 regression lines sampled from posterior distributions",
-        x = "SAT Verbal", 
+        x = "SAT Verbal",
         y = "SAT Quantitative",
         alt = "The plot shows the linear relationship between sat verbal scores and sat quantitative scores"
       )+
@@ -1378,7 +1457,7 @@ server <- function(input, output, session) {
         axis.title = element_text(size = 16),
       )
   })
-  
+
   output$blrparapre<-renderTable({
     c2<-paste("95% Credible interval"," lower bound",sep = "<br>")
     c3<-paste("95% Credible interval"," upper bound",sep = "<br>")
@@ -1395,11 +1474,11 @@ server <- function(input, output, session) {
       nrow=3,ncol=3,byrow = TRUE,dimnames = list(c("Intercept","SAT Verbal","Sigma"),
                                                  c("Mean",c2,c3)))
   },rownames = TRUE,bordered = TRUE,sanitize.text.function=identity)
-  
-  
+
+
   output$bayesestimate<-renderPlot({
     ## 95% credible
-    valueci<-quantile(newpredblr()[,1], probs = c(.025,.975)) 
+    valueci<-quantile(newpredblr()[,1], probs = c(.025,.975))
     p1<-
       ggplot()+
       geom_density(
@@ -1433,7 +1512,7 @@ server <- function(input, output, session) {
       labs(
         title = paste0("Bayesian Prediction for Mean Verbal vs. Verbal = ",input$xpointblr),
         subtitle = paste0("* Predicted values of SAT Quantitative when SAT Verbal = ",round(mean(trainpreblr()$SATV),1)," vs. ",input$xpointblr),
-        x = "Predicted SAT Quantitative Scores", 
+        x = "Predicted SAT Quantitative Scores",
         y = "Density",
         alt = "A plot for the point estimate"
       )+
@@ -1455,7 +1534,7 @@ server <- function(input, output, session) {
       )
     return(p2)
   })
-  
+
   output$blrpriorOutputpre<-renderUI({
     validate(
       need(
@@ -1475,17 +1554,17 @@ server <- function(input, output, session) {
              round(1/prp$prior_aux$adjusted_scale,2),")")
     )
   })
-  
+
   output$tableblr<-renderTable({
     # ci
-    ci<-valueci<-quantile(newpredblr()[,1], probs = c(.025,.975)) 
+    ci<-valueci<-quantile(newpredblr()[,1], probs = c(.025,.975))
     c1<-paste("95% Credible region"," lower bound",sep = "<br>")
     c2<-paste("95% Credible region"," upper bound",sep = "<br>")
     ctable<-matrix(c(round(ci[1],3),round(ci[2],3)),nrow=1)
     colnames(ctable)<-c(c1,c2)
     ctable
   },bordered = TRUE,sanitize.text.function=identity)
-  
+
 }
 
 # Boast App Call ----
