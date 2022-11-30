@@ -2,30 +2,32 @@
 library(shiny)
 library(shinydashboard)
 library(shinyBS)
-library(shinyWidgets)
 library(boastUtils)
-
-# Load additional dependencies and setup functions
-# source("global.R")
+library(psych)
+library(ggplot2)
+library(dplyr)
+library(brms)
+library(Metrics)
+library(ggpubr)
 
 # Define UI for App ----
 ui <- list(
   ## Create the app page ----
   dashboardPage(
-    skin = "blue",
+    skin = "black",
     ### Create the app header ----
     dashboardHeader(
-      title = "App Template", # You may use a shortened form of the title here
+      title = "Bayesian Linear Regr.",
       titleWidth = 250,
       tags$li(class = "dropdown", actionLink("info", icon("info"))),
       tags$li(
         class = "dropdown",
-        boastUtils::surveyLink(name = "App_Template")
+        boastUtils::surveyLink(name = "Bayesian_Linear_Regression")
       ),
       tags$li(
         class = "dropdown",
         tags$a(href = 'https://shinyapps.science.psu.edu/',
-               icon("home")
+               icon("house")
         )
       )
     ),
@@ -34,12 +36,11 @@ ui <- list(
       width = 250,
       sidebarMenu(
         id = "pages",
-        menuItem("Overview", tabName = "overview", icon = icon("tachometer-alt")),
+        menuItem("Overview", tabName = "overview", icon = icon("gauge-high")),
         menuItem("Prerequisites", tabName = "prerequisites", icon = icon("book")),
-        menuItem("Explore", tabName = "explore", icon = icon("wpexplorer")),
-        menuItem("Challenge", tabName = "challenge", icon = icon("cogs")),
-        menuItem("Game", tabName = "game", icon = icon("gamepad")),
-        menuItem("Wizard", tabName = "wizard", icon = icon("hat-wizard")),
+        menuItem("Example", tabName = "example", icon = icon("book-open-reader")),
+        menuItem("OLS Regression", tabName = "ols", icon = icon("wpexplorer")),
+        menuItem("Bayesian Regression", tabName = "bayesian", icon = icon("wpexplorer")),
         menuItem("References", tabName = "references", icon = icon("leanpub"))
       ),
       tags$div(
@@ -54,27 +55,28 @@ ui <- list(
         tabItem(
           tabName = "overview",
           withMathJax(),
-          h1("Sample Application for BOAST Apps"), # This should be the full name.
-          p("This is a sample Shiny application for BOAST. Remember, this page
-            will act like the front page (home page) of your app. Thus you will
-            want to have this page catch attention and describe (in general terms)
-            what the user can do in the rest of the app."),
+          h1("Bayesian Linear Regression"), 
+          p("This app introduces the concept of Bayesian linear regression. 
+            We will compare the Simple linear regression (using ordinary least 
+            squares (OLS) technique to find the best-fitting line for a set of data points) 
+            with Bayesian linear regression, and see some results applied to simple 
+            datasets."),
           h2("Instructions"),
-          p("This information will change depending on what you want to do."),
+          p("In order to use this app more effectively, it is recommended to 
+            explore in the following order."),
           tags$ol(
-            tags$li("Review any prerequiste ideas using the Prerequistes tab."),
-            tags$li("Explore the Exploration Tab."),
-            tags$li("Challenge yourself."),
-            tags$li("Play the game to test how far you've come.")
+            tags$li("Review prerequistes using the Prerequistes tab."),
+            tags$li("Enter the Explore page and compare the results of 
+                    Bayesian method and traditional method.")
           ),
-          ##### Go Button--location will depend on your goals
+          ##### Go prere
           div(
             style = "text-align: center;",
             bsButton(
-              inputId = "go1",
-              label = "GO!",
+              inputId = "goPre",
+              label = "Prerequisites!",
               size = "large",
-              icon = icon("bolt"),
+              icon = icon("book"),
               style = "default"
             )
           ),
@@ -83,11 +85,8 @@ ui <- list(
           br(),
           h2("Acknowledgements"),
           p(
-            "This version of the app was developed and coded by Neil J.
-            Hatfield  and Robert P. Carey, III.",
+            "This version of the app was developed and coded by Jing Fu.",
             br(),
-            "We would like to extend a special thanks to the Shiny Program
-            Students.",
             br(),
             br(),
             "Cite this app as:",
@@ -95,7 +94,7 @@ ui <- list(
             citeApp(),
             br(),
             br(),
-            div(class = "updated", "Last Update: 5/19/2022 by NJH.")
+            div(class = "updated", "Last Update: 11/29/2022 by JF.")
           )
         ),
         #### Set up the Prerequisites Page ----
@@ -106,109 +105,478 @@ ui <- list(
           p("In order to get the most out of this app, please review the
             following:"),
           tags$ul(
-            tags$li("Pre-req 1--Technical/Conceptual Prerequisites are ideas that
-                    users need to have in order to engage with your app fully."),
-            tags$li("Pre-req 2--Contextual Prerequisites refer to any information
-                    about a context in your app that will enrich a user's
-                    understandings."),
-            tags$li("Pre-req 3"),
-            tags$li("Pre-req 4")
+            tags$li("Ordinary least squares (OLS) is a method for fitting the 
+                    model parameters by minimizing the residual sum of squares (RSS). 
+                    RSS is the total of the squared differences between the actual 
+                    values (y) and the predicted model outputs."),
+            tags$li("Bayesian linear regression is an approach to linear regression 
+                    in which the statistical analysis is undertaken within the 
+                    context of Bayesian inference. The aim of Bayesian Linear 
+                    Regression is not to find the single “best” value of the model 
+                    parameters, but rather to determine the posterior distribution 
+                    for the model parameters.")
           ),
-          p("Notice the use of an unordered list; users can move through the
-            list any way they wish."),
-          box(
-            title = strong("Null Hypothesis Significance Tests (NHSTs)"),
-            status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
-            width = '100%',
-            "In the Confirmatory Data Analysis tradition, null hypothesis
-            significance tests serve as a critical tool to confirm that a
-            particular theoretical model describes our data and to make a
-            generalization from our sample to the broader population
-            (i.e., make an inference). The null hypothesis often reflects the
-            simpler of two models (e.g., 'no statistical difference',
-            'there is an additive difference of 1', etc.) that we will use to
-            build a sampling distribution for our chosen estimator. These
-            methods let us test whether our sample data are consistent with this
-            simple model (null hypothesis)."
-          ),
-          box(
-            title = strong(tags$em("p"), "-values"),
-            status = "primary",
-            collapsible = TRUE,
-            collapsed = FALSE,
-            width = '100%',
-            "The probability that our selected estimator takes on a value at
-            least as extreme as what we observed given our null hypothesis. If
-            we were to carry out our study infinitely many times and the null
-            hypothesis accurately modeled what we're studying, then we would
-            expect for our estimator to produce a value at least as extreme as
-            what we have seen 100*(p-value)% of the time. The larger the
-            p-value, the more often we would expect our estimator to take on a
-            value at least as extreme as what we've seen; the smaller, the less
-            often."
+          br(),
+          br(),
+          div(
+            style = "text-align: center;",
+            bsButton(
+              inputId = "go",
+              label = "GO!",
+              size = "large",
+              icon = icon("bolt"),
+              style = "default"
+            )
           )
         ),
-        #### Note: you must have at least one of the following pages. You might
-        #### have more than one type and/or more than one of the same type. This
-        #### will be up to you and the goals for your app.
-        #### Set up an Explore Page ----
+        #### Set up an Example Page ----
         tabItem(
-          tabName = "explore",
-          withMathJax(),
-          h2("Explore the Concept"),
-          p("This page should include something for the user to do, the more
-            active and engaging, the better. The purpose of this page is to help
-            the user build a productive understanding of the concept your app
-            is dedicated to."),
-          p("Common elements include graphs, sliders, buttons, etc."),
-          p("The following comes from the NHST Caveats App:"),
+          tabName = "example",
+          h2("Example"),
+          withMathJax(
+            p("We have 700 students' SAT Verbal and SAT Quantitative 
+              self-report scores. We want to study whether there is a 
+              linear relationship between SAT Verbal scores and SAT 
+              Quantitative scores. The expression is: 
+              $$SATQ = \\beta_0 + \\beta_1SATV +\\epsilon$$")
+          ),
+          p("The following graph shows OLS and BLR model. With OLS, we get a single 
+            estimate with 95% confidence interval for the model parameters, the 
+            intercept and slope here. With BLR, we get posterior distributions of 
+            parameters, intercept, slope and sigma here. And we explore 100 
+            possible models drawn from the model parameter posteriors."),
+          br(),
+          fluidPage(
+            ##### OLS----
+            ###### input----
+            tags$strong("Ordinary Least Squares"),
+            br(),
+            br(),
+            column(
+              width = 4,
+              offset = 0,
+              wellPanel(
+                checkboxInput(
+                  inputId = "olsband",
+                  label = "Show 95% confidence band", 
+                  value = FALSE
+                )
+              )
+            ),
+            ###### output----
+            column(
+              width = 8,
+              offset = 0,
+              plotOutput("olsfit"),
+              checkboxInput(
+                inputId = "olsparaC",
+                label = "Results table", 
+                value = FALSE
+              ),
+              conditionalPanel(
+                condition = "input.olsparaC==1",
+                tableOutput("olspara")
+              )
+            ),
+            br(),
+            ##### BLR----
+            tags$strong("Bayesian Linear Regression"),
+            br(),
+            br(),
+            column(
+              width = 4,
+              offset = 0,
+              wellPanel(
+                ###### input----
+                selectInput(
+                  inputId = "priortype",
+                  label = "Prior distributions",
+                  choices = c(
+                    "-----" = "null"
+                  ),
+                  selected = "null"
+                ),
+                conditionalPanel(
+                  condition = "input.priortype == 'defaultp'",
+                  uiOutput("defaultpriors"),
+                ),
+                conditionalPanel(
+                  condition = "input.priortype == 'informp'",
+                  tags$strong("Interept"),
+                  sliderInput(
+                    inputId = "beta0mu",
+                    label = "Mean for intercept",
+                    min = 200,
+                    max = 800,
+                    value = 500
+                  ),
+                  sliderInput(
+                    inputId = "beta0sigma",
+                    label = "SD for intercept",
+                    min = 10,
+                    max = 200,
+                    value = 50
+                  ),
+                  tags$strong("Slope"),
+                  sliderInput(
+                    inputId = "beta1mu",
+                    label = "Mean for slope",
+                    min = -4,
+                    max = 4,
+                    value = 0.5,
+                    step = 0.1
+                  ),
+                  sliderInput(
+                    inputId = "beta1sigma",
+                    label = "SD for slope",
+                    min = 0.01,
+                    max = 1,
+                    value = 0.03,
+                    step = 0.01
+                  ),
+                  tags$strong("Sigma"),
+                  sliderInput(
+                    inputId = "sigmarate",
+                    label = "Rate for sigma",
+                    min = 0.01,
+                    max = 0.1,
+                    step = 0.01,
+                    value = 0.02
+                  )
+                ),
+                div(
+                  style = "text-align: center;",
+                  bsButton(
+                    inputId = "examplego",
+                    label = "Start!",
+                    size = "large",
+                    style = "default"
+                  )
+                )
+              )
+            ),
+            ###### output----
+            column(
+              width = 8,
+              offset = 0,
+              shinycssloaders::withSpinner(
+                plotOutput("blrfit")
+              ),
+              checkboxInput(
+                inputId = "blrparaC",
+                label = "Results table", 
+                value = FALSE
+              ),
+              conditionalPanel(
+                condition = "input.blrparaC==1",
+                tableOutput("blrpara")
+              ),
+              checkboxInput(
+                inputId = "blrparaplotC",
+                label = "Show prior and posterior distributions of parameters", 
+                value = FALSE
+              ),
+              conditionalPanel(
+                condition = "input.blrparaplotC==1",
+                plotOutput("blrparaplot")
+              )
+            )
+          )
         ),
-        #### Set up a Challenge Page ----
+        #### Set up an OLS Prediction Page ----
         tabItem(
-          tabName = "challenge",
-          withMathJax(),
-          h2("Challenge Yourself"),
-          p("The general intent of a Challenge page is to have the user take
-            what they learned in an Exploration and apply that knowledge in new
-            contexts/situations. In essence, to have them challenge their
-            understanding by testing themselves."),
-          p("What this page looks like will be up to you. Something you might
-            consider is to re-create the tools of the Exploration page and then
-            a list of questions for the user to then answer.")
+          tabName = "ols",
+          h2("Explore Ordinary Least Squares regression prediction results"),
+          withMathJax(
+            p("We have 700 students' SAT Verbal and SAT Quantitative self-report scores. 
+              We want to study whether there is a linear relationship between SAT 
+              Verbal scores and SAT Quantitative scores. The expression is: 
+              $$SATQ = \\beta_0 + \\beta_1SATV +\\epsilon$$")),
+          p("Explore the prediction results of the OLS method. Use the slider 
+              to select the proportion of data in the training set and select 
+              the SAT verbal scores you want to use to predict SAT quantitative 
+              scores. We will show the results predicted by the OLS method with 
+              the 95% confidence interval.In the two plots, you will find that 
+              once the training set is selected, the prediction curve for average 
+              verbal will be fixed (black one), but as the verbal you select 
+              changes, the prediction curve for it will also change (blue one)."),
+          
+          fluidPage(
+            #####input----
+            column(
+              width =4,
+              offset = 0,
+              wellPanel(
+                sliderInput(
+                  inputId = "trainingsizepreols",
+                  label = "Proportion of full dataset",
+                  min = 0.05,
+                  max = 0.95,
+                  value = 0.05,
+                  step = 0.05
+                ),
+                sliderInput(
+                  inputId = "xpointols",
+                  label = "SAT Verbal for prediction",
+                  min = 200,
+                  max = 800,
+                  value = 700,
+                  step = 5
+                ),
+                checkboxInput(
+                  inputId = "olsbandpre",
+                  label = "Show 95% confidence band", 
+                  value = FALSE
+                ),
+                bsButton(
+                  inputId = "newsamplepreols",
+                  label = "New Sample",
+                  size = "large",
+                  icon = icon("retweet"),
+                  style = "default"
+                ),
+                br(),
+                br(),
+                uiOutput("maesols")
+              )
+            ),
+            ##### output----
+            column(
+              width = 8,
+              offset = 0,
+              plotOutput("olsfitpre"),
+              checkboxInput(
+                inputId = "olsparapreC",
+                label = "Results table", 
+                value = FALSE
+              ),
+              conditionalPanel(
+                condition = "input.olsparapreC==1",
+                tableOutput("olsparapre")
+              ),
+              plotOutput("olsestimate"),
+              checkboxInput("resultsols",
+                            "Results table", FALSE),
+              conditionalPanel(
+                condition = "input.resultsols==1",
+                tableOutput("tableols")
+              ),
+              uiOutput("test")
+            )
+          )
         ),
-        #### Set up a Game Page ----
+        #### Set up a Bayesian Regr. Prediction Page ----
         tabItem(
-          tabName = "game",
-          withMathJax(),
-          h2("Practice/Test Yourself with [Type of Game]"),
-          p("On this type of page, you'll set up a game for the user to play.
-            Game types include Tic-Tac-Toe, Matching, and a version Hangman to
-            name a few. If you have ideas for new game type, please let us know.")
-        ),
-        #### Set up a Wizard Page ----
-        tabItem(
-          tabName = "wizard",
-          withMathJax(),
-          h2("Wizard"),
-          p("This page will have a series of inputs and questions for the user to
-            answer/work through in order to have the app create something. These
-            types of Activity pages are currently rare as we try to avoid
-            creating 'calculators' in the BOAST project.")
+          tabName = "bayesian",
+          h2("Explore Bayesian linear regression prediction results"),
+          withMathJax(
+            p("We have 700 students' SAT Verbal and SAT Quantitative self-report scores. 
+              We want to study whether there is a linear relationship between SAT 
+              Verbal scores and SAT Quantitative scores. The expression is: 
+              $$SATQ = \\beta_0 + \\beta_1SATV +\\epsilon$$")),
+          p("Explore the prediction results of the BLR model. 
+              Use the slider to select the proportion of data in the training set, 
+              and select the prior distribution for Bayesian regression. Then 
+              select the SAT verbal scores you want to use to predict SAT quantitative 
+              scores. We will show the results predicted by the BLR method and 
+              the 95% credible interval.In the two plots, you will find that 
+              once the training set is selected, the prediction curve for 
+              average verbal will be fixed (black one), but as the verbal you 
+              select changes, the prediction curve for it will also change (blue one)."),  
+          fluidPage(
+            #####input----
+            column(
+              width = 4,
+              offset = 0,
+              wellPanel(
+                sliderInput(
+                  inputId = "trainingsizepreblr",
+                  label = "Proportion of full dataset",
+                  min = 0.05,
+                  max = 0.95,
+                  value = 0.05,
+                  step = 0.05
+                ),
+                sliderInput(
+                  inputId = "xpointblr",
+                  label = "SAT Verbal for prediction",
+                  min = 200,
+                  max = 800,
+                  value = 700,
+                  step = 5
+                ),
+                selectInput(
+                  inputId = "priortypepreblr",
+                  label = "Prior distributions",
+                  choices = c(
+                    "-----" = "null"
+                  ),
+                  selected = "null"
+                ),
+                conditionalPanel(
+                  condition = "input.priortypepreblr == 'informp'",
+                  tags$strong("Intercept"),
+                  sliderInput(
+                    inputId = "beta0mupreblr",
+                    label = "Mean for intercept",
+                    min = 200,
+                    max = 800,
+                    value = 500
+                  ),
+                  sliderInput(
+                    inputId = "beta0sigmapreblr",
+                    label = "SD for intercept",
+                    min = 10,
+                    max = 200,
+                    value = 50
+                  ),
+                  tags$strong("Slope"),
+                  sliderInput(
+                    inputId = "beta1mupreblr",
+                    label = "Mean for slope",
+                    min = -4,
+                    max = 4,
+                    value = 0.5,
+                    step = 0.1
+                  ),
+                  sliderInput(
+                    inputId = "beta1sigmapreblr",
+                    label = "SD for slope",
+                    min = 0.01,
+                    max = 1,
+                    value = 0.03,
+                    step = 0.01
+                  ),
+                  tags$strong("Sigma"),
+                  sliderInput(
+                    inputId = "sigmaratepreblr",
+                    label = "Mean for sigma",
+                    min = 0.01,
+                    max = 0.1,
+                    step = 0.01,
+                    value = 0.02
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.priortypepreblr == 'defaultp'",
+                  uiOutput("blrpriorOutputpre")
+                ),
+                br(),
+                div(
+                  style = "text-align: center;",
+                  bsButton(
+                    inputId = "newsamplepreblr",
+                    label = "New Sample",
+                    size = "large",
+                    icon = icon("retweet"),
+                    style = "default"
+                  )
+                ),
+                br(),
+                div(
+                  style = "text-align: center;",
+                  bsButton(
+                    inputId = "blrgo",
+                    label = "Start!",
+                    size = "large",
+                    style = "default"
+                  )
+                ),
+                br(),
+                uiOutput("maesblr")
+              )
+            ),
+            ##### output----
+            column(
+              width = 8,
+              offset = 0,
+              shinycssloaders::withSpinner(
+                plotOutput("blrfitpre")
+              ),
+              checkboxInput(
+                inputId = "blrparaCpre",
+                label = "Results table", 
+                value = FALSE
+              ),
+              conditionalPanel(
+                condition = "input.blrparaCpre==1",
+                tableOutput("blrparapre")
+              ),
+              shinycssloaders::withSpinner(
+                plotOutput("bayesestimate")
+              ),
+              checkboxInput("resultsblr",
+                            "Results table", FALSE),
+              conditionalPanel(
+                condition = "input.resultsblr==1",
+                tableOutput("tableblr")
+              )
+            )
+          )
         ),
         #### Set up the References Page ----
         tabItem(
           tabName = "references",
           withMathJax(),
           h2("References"),
-          p("You'll need to fill in this page with all of the appropriate
-            references for your app."),
           p(
             class = "hangingindent",
             "Bailey, E. (2015). shinyBS: Twitter bootstrap components for shiny.
-            (v0.61). [R package]. Available from
+            (v 0.61). [R package]. Available from
             https://CRAN.R-project.org/package=shinyBS"
+          ),
+          p(
+            class = "hangingindent",
+            "Bürkner, P.(2021). brms: Bayesian Regression Models using 'Stan'. 
+            (v 2.18.1) [R package]. Available 
+            from https://CRAN.R-project.org/package=brms"
+          ),
+          p(
+            class = "hangingindent",
+            "Carey, R. and Hatfield, N. J. (2022). boastUtils: BOAST utlities.
+            (v 0.1.12.3). [R package]. Available from
+            https://github.com/EducationShinyAppTeam/boastUtils"
+          ),
+          p(
+            class = "hangingindent",
+            "Change, W., and Borges Ribeiro, B. (2021). shinydashboard: Create 
+            dashboards with 'shiny'. (v 0.7.2) [R package]. Available from
+            https://CRAN.R-project.org/package=shinydashboard"
+          ),
+          p(
+            class = "hangingindent",
+            "Chang, W., Cheng J., Allaire, J., Sievert, C., Schloerke, B., Xie, Y.,
+            Allen, J., McPherson, J., Dipert, A., and Borges, B. (2021). shiny:
+            Web application framework for R. (v 1.7.1). [R package]. Available
+            from https://CRAN.R-project.org/package=shiny"
+          ),
+          p(
+            class = "hangingindent",
+            "Hamner, B., Michael, F., and LeDell, E. (2022). Metrics: Evaluation Metrics for Machine Learning 
+            (v 2.2.5) [R package]. Available from https://CRAN.R-project.org/package=Metrics"
+          ),
+          p(
+            class = "hangingindent",
+            "Kassambara, A. (2020). ggpubr: 'ggplot2' Based Publication Ready Plots.
+            (v 0.4.0) [R package]. Available from https://CRAN.R-project.org/package=ggpubr"
+          ),
+          p(
+            class = "hangingindent",
+            "Revelle, W. (2022). psych: Procedures for Psychological, Psychometric, 
+            and Personality Research. Northwestern University, Evanston, Illinois. 
+            (v 2.2.5) [R package]. Available from https://CRAN.R-project.org/package=psych"
+          ),
+          p(
+            class = "hangingindent",
+            "Wickham, H. (2016). ggplot2: Elegant graphics for data analysis.
+            Springer-Verlag:New York. (v 3.3.6) [R package]. Available from
+            https://ggplot2.tidyverse.org"
+          ),
+          p(
+            class = "hangingindent",
+            "Wickham, H., François, R., Henry, L.,and Müller, K. (2022). dplyr: A 
+            Grammar of Data Manipulation. (v 1.0.9).[R package]. Available from 
+            https://dplyr.tidyverse.org"
           ),
           br(),
           br(),
@@ -222,7 +590,7 @@ ui <- list(
 
 # Define server logic ----
 server <- function(input, output, session) {
-
+  
   ## Set up Info button ----
   observeEvent(
     eventExpr = input$info,
@@ -231,10 +599,1124 @@ server <- function(input, output, session) {
         session = session,
         type = "info",
         title = "Information",
-        text = "This App Template will help you get started building your own app"
+        text = "This App will help you to understand the differences between 
+        Bayesian Linear Regression and Frequentist Linear Regression"
       )
     }
   )
+## prerequisites button
+observeEvent(
+  eventExpr = input$goPre,
+  handlerExpr = {
+    updateTabItems(
+      session = session,
+      inputId = "pages",
+      selected = "prerequisites"
+    )
+  }
+)
+## ols button
+observeEvent(
+  eventExpr = input$go,
+  handlerExpr = {
+    updateTabItems(
+      session = session,
+      inputId = "pages",
+      selected = "example"
+    )
+  }
+)
+## Full data
+satFull <- sat.act[c(5,6)]
+## Example Page----
+### OLS----
+## training set
+trainols <- reactive(na.omit(satFull))
+olsmodel <- reactive(lm(SATQ~SATV,data = trainols()))
+output$olsfit <- renderPlot({
+  band <-if(input$olsband == 1){
+    stat_smooth(
+      data=trainols(),
+      mapping = aes(x=SATV,y=SATQ),
+      method = "lm",
+      formula = y~x,
+      level = 0.95,
+      color = psuPalette[1]
+    )
+  }else{
+    stat_smooth(
+      data = trainols(),
+      mapping = aes(x=SATV,y=SATQ),
+      method = "lm",
+      formula = y~x,
+      se = FALSE,
+      color = psuPalette[1]
+    )
+  }
+  p <- ggplot()+
+    geom_point(
+      data=trainols(),
+      mapping = aes(x=SATV,y=SATQ),
+      colour="black",
+      alpha = 0.5
+    ) + 
+    band + 
+    labs(
+      title = "Ordinary Least Squares",
+      x = "SAT Verbal", 
+      y = "SAT Quantitative",
+      alt = "The plot shows the linear relationship between sat verbal scores and sat quantitative scores"
+    ) + 
+    theme_bw() + 
+    theme(
+      plot.caption = element_text(size = 18),
+      text = element_text(size = 18),
+      axis.title = element_text(size = 16)
+    )
+  return(p)
+})
+
+output$olspara <- renderTable({
+  coeff <- coefficients(olsmodel())
+  c2 <- paste("95% Confidence interval"," lower bound",sep = "<br>")
+  c3 <- paste("95% Confidence interval"," upper bound",sep = "<br>")
+  ctable <- matrix(
+    c(coeff[1],confint(olsmodel())[1],confint(olsmodel())[3],coeff[2],
+      confint(olsmodel())[2],confint(olsmodel())[4]),
+    nrow = 2,
+    ncol = 3,
+    byrow = TRUE,
+    dimnames = list(c("Intercept","SAT Verbal"),c("Estimate",c2,c3)))
+},
+rownames = TRUE,
+bordered = TRUE,
+sanitize.text.function=identity)
+
+### Bayesian----
+## button click
+examplegoClick <- reactiveVal(0)
+observeEvent(
+  eventExpr = input$examplego,
+  handlerExpr = {
+    examplegoClick(examplegoClick()+1)
+  }
+)
+## disabled start button
+observeEvent(
+  eventExpr = input$examplego,
+  handlerExpr = {
+    updateButton(
+      session = session,
+      inputId = "examplego",
+      disabled = TRUE
+    )
+  }
+)
+## update prior type
+observeEvent(
+  eventExpr = input$examplego,
+  handlerExpr = {
+    updateSelectInput(
+      session = session,
+      inputId = "priortype",
+      choices = c(
+        "Default priors" = "defaultp",
+        "Informative priors" = "informp"
+      ),
+      selected = "defaultp"
+    )
+  }
+)
+
+## training set
+trainblr <- reactive(na.omit(satFull))
+blrmodel <- reactive({
+  if(input$priortype == 'defaultp'){
+    blrmodel <- brm(SATQ~SATV,data = trainblr(),iter = 2000,chain = 1)
+  }
+  if(input$priortype == 'informp'){
+    stanvars <- stanvar(x = input$beta1mu,name = "beta1mu") + 
+      stanvar(x = input$beta1sigma,name = "beta1sigma") + 
+      stanvar(x = input$beta0mu,name = "beta0mu") + 
+      stanvar(x = input$beta0sigma,name = "beta0sigma") + 
+      stanvar(x = input$sigmarate, name = "sigmarate")
+    priorset <- c(
+      prior(normal(beta1mu,beta1sigma),class = b,coef = SATV),
+      prior(normal(beta0mu,beta0sigma),class = Intercept),
+      prior(exponential(sigmarate),class = sigma))
+    blrmodel <- brm(
+      formula = SATQ~SATV,
+      data = trainblr(),
+      prior = priorset,
+      iter = 2000,
+      chain = 1,
+      stanvars = stanvars)
+  }
+  return(blrmodel)
+})
+## posterior values
+postparas <- reactive(as.data.frame(blrmodel()))
+
+output$defaultpriors <- renderUI({
+  validate(
+    need(
+      examplegoClick() > 0,
+      ""
+    ),
+    need(
+      input$priortype == 'defaultp',
+      "")
+  )
+  pr <- prior_summary(blrmodel())
+  withMathJax(
+    paste0("Intercept~",pr$prior[3]),
+    br(),
+    paste0("Slope~Improper flat"),
+    br(),
+    paste0("Sigma~",pr$prior[4]),
+    br(),
+    paste0("Note: Student_t(df,\u03BC,\u03C3)")
+  )
+})
+
+output$blrfit <- renderPlot({
+  validate(
+    need(
+      examplegoClick() > 0,
+      "It will take a little bit time to render, press Start button to trigger
+        the rendering")
+  )
+  newdata <- sample_n(postparas(),100)
+  ggplot() + 
+    geom_point(
+      data = trainblr(),
+      mapping = aes(x = SATV,y = SATQ),
+      colour = "black",
+      alpha = 0.5
+    ) + 
+    geom_segment(
+      data = newdata,
+      mapping = aes(
+        x = 200, 
+        xend = 800,
+        y = newdata[,1] + newdata[,2]*200, 
+        yend = newdata[,1] + newdata[,2]*800
+      ),
+      color = psuPalette[1],
+      alpha = 0.1
+    ) + 
+    labs(
+      title = "Bayesian Linear Regression",
+      subtitle = "* 100 regression lines sampled from posterior distributions",
+      x = "SAT Verbal", 
+      y = "SAT Quantitative",
+      alt = "The plot shows the linear relationship between sat verbal scores and sat quantitative scores"
+    ) + 
+    theme_bw() + 
+    theme(
+      plot.caption = element_text(size = 18),
+      plot.subtitle = element_text(lineheight = 0.9,size = 16),
+      text = element_text(size = 18),
+      axis.title = element_text(size = 16),
+    )
+})
+
+output$blrpara <- renderTable({
+  validate(
+    need(
+      input$priortype == 'defaultp',
+      "")
+  )
+  c2 <- paste("95% Credible interval"," lower bound",sep = "<br>")
+  c3 <- paste("95% Credible interval"," upper bound",sep = "<br>")
+  ctable <- matrix(
+    c(mean(postparas()[,1]),
+      quantile(postparas()[,1],probs = .025),
+      quantile(postparas()[,1],probs = .975),
+      mean(postparas()[,2]),
+      quantile(postparas()[,2],probs = .025),
+      quantile(postparas()[,2],probs = .975),
+      mean(postparas()[,3]),
+      quantile(postparas()[,3],probs = .025),
+      quantile(postparas()[,3],probs = .975)),
+    nrow = 3,
+    ncol = 3,
+    byrow = TRUE,
+    dimnames = list(c("Intercept","SAT Verbal","Sigma"),c("Mean",c2,c3))
+  )
+},
+rownames = TRUE,
+bordered = TRUE,
+sanitize.text.function = identity)
+
+output$blrparaplot <- renderPlot({
+  validate(
+    need(
+      examplegoClick() > 0,
+      "It will take a little bit time to render, press Start button to trigger
+      the rendering")
+  )
+  ## informative
+  if(input$priortype == 'informp'){
+    # intercept
+    intx <- seq(100,800,length = 1000)
+    inty <- dnorm(intx,mean = input$beta0mu,sd = input$beta0sigma)
+    intdata <- data.frame(x = intx,y = inty)
+    combined1 <- ggplot() + 
+      geom_line(
+        data = intdata,
+        mapping = aes(x = x,y = y,colour = "Prior")
+      ) + 
+      geom_density(
+        data = postparas(),
+        mapping = aes(x = postparas()[,1],colour = "Posterior")
+      )
+    combined1all <- 
+      combined1 + 
+      geom_point(
+        mapping = aes(
+          x = c(quantile(postparas()[,1],probs=.025),
+                quantile(postparas()[,1],probs=.975)),
+          y = c(0,0)),
+        alpha = 0
+      ) + 
+      geom_errorbarh(
+        aes(
+          xmin = quantile(postparas()[,1],probs=.025),
+          xmax = quantile(postparas()[,1],probs=.975),
+          y = 0,
+          colour = "Credible region"),
+        height = 0.05*layer_scales(combined1)$y$get_limits()[2],
+        size = 1
+      ) + 
+      labs(
+        x = "Intercept", 
+        y = "Density",
+        alt = "The plot combined the prior distribution and the posterior plot"
+      ) + 
+      scale_x_continuous(expand = expansion(mult = 0)) +
+      scale_y_continuous(expand = expansion(mult = .05))+
+      scale_color_manual(
+        name = NULL,
+        values = c(
+          "Credible region" = psuPalette[1],
+          "Prior" = psuPalette[3],
+          "Posterior" = psuPalette[2]
+        )
+      ) + 
+      theme_bw() + 
+      theme(
+        plot.caption = element_text(size = 18),
+        text = element_text(size = 18),
+        axis.title = element_text(size = 16),
+        legend.position = "bottom"
+      )
+    # slope
+    slopex <- seq(-4,4,length = 1000)
+    slopey <- dnorm(slopex,mean = input$beta1mu,sd = input$beta1sigma)
+    slopedata <- data.frame(x = slopex,y = slopey)
+    combined2 <- ggplot() + 
+      geom_line(
+        data = slopedata,
+        mapping = aes(x = x,y = y,colour = "Prior")
+      ) + 
+      geom_density(
+        data = postparas(),
+        mapping = aes(x = postparas()[,2], colour = "Posterior")
+      )
+    combined2all <- 
+      combined2 + 
+      geom_point(
+        mapping = aes(
+          x = c(quantile(postparas()[,2],probs =.025),
+                quantile(postparas()[,2],probs =.975)),
+          y = c(0,0)),
+        alpha=0
+      ) + 
+      geom_errorbarh(
+        aes(
+          xmin = quantile(postparas()[,2],probs =.025),
+          xmax = quantile(postparas()[,2],probs =.975),
+          y = 0,
+          colour = "Credible region"),
+        height = 0.05*layer_scales(combined2)$y$get_limits()[2],
+        size = 1
+      ) + 
+      labs(
+        x = "Slope", 
+        y = "Density",
+        alt = "The plot combined the prior distribution and the posterior plot"
+      ) + 
+      scale_x_continuous(expand = expansion(mult = 0)) +
+      scale_y_continuous(expand = expansion(mult = .05))+
+      scale_color_manual(
+        name = NULL,
+        values = c(
+          "Credible region" = psuPalette[1],
+          "Prior" = psuPalette[3],
+          "Posterior" = psuPalette[2]
+        )
+      ) +  
+      theme_bw() + 
+      theme(
+        plot.caption = element_text(size = 18),
+        text = element_text(size = 18),
+        axis.title = element_text(size = 16),
+        legend.position = "bottom"
+      )
+    # sigma
+    sigmax <- seq(0,800,length = 1000)
+    sigmay <- dexp(sigmax,rate = input$sigmarate)
+    sigmadata <- data.frame(x = sigmax,y = sigmay)
+    combined3 <- ggplot() + 
+      geom_line(
+        data = sigmadata,
+        mapping = aes(x = x,y = y,colour = "Prior")
+      ) + 
+      geom_density(
+        data = postparas(),
+        mapping = aes(x = postparas()[,3],colour = "Posterior")
+      )
+    combined3all <- combined3 + 
+      geom_point(
+        mapping = aes(
+          x = c(quantile(postparas()[,3],probs = .025),
+                quantile(postparas()[,3],probs = .975)),
+          y = c(0,0)),
+        alpha = 0
+      ) + 
+      geom_errorbarh(
+        aes(
+          xmin = quantile(postparas()[,3],probs =.025),
+          xmax = quantile(postparas()[,3],probs =.975),
+          y = 0,
+          colour = "Credible region"),
+        height = 0.05*layer_scales(combined3)$y$get_limits()[2],
+        size = 1
+      ) + 
+      labs(
+        x = "Sigma", 
+        y = "Density",
+        alt = "The plot combined the prior distribution and the posterior plot"
+      ) + 
+      scale_x_continuous(expand = expansion(mult = 0)) + 
+      scale_y_continuous(expand = expansion(mult = .05)) + 
+      scale_color_manual(
+        name = NULL,
+        values = c(
+          "Credible region" = psuPalette[1],
+          "Prior" = psuPalette[3],
+          "Posterior" = psuPalette[2]
+        )
+      ) + 
+      theme_bw() + 
+      theme(
+        plot.caption = element_text(size = 18),
+        text = element_text(size = 18),
+        axis.title = element_text(size = 16),
+        legend.position = "bottom"
+      )
+    all <-ggarrange(
+      combined1all,
+      combined2all,
+      combined3all,
+      ncol = 2,
+      nrow = 2,
+      common.legend = TRUE,
+      legend = "bottom")
+    allt < -annotate_figure(
+      p = all,
+      top = text_grob(
+        "Prior and Posterior",
+        color = "black", 
+        size = 22
+      )
+    )
+    return(allt)
+  }
+  ## weakly informative
+  if(input$priortype == 'defaultp'){
+    # default prior
+    # Slope: flat
+    # intercept: student_t (3,620,118.6)
+    # sigma:student_t(3,0,118.6)
+    pr <- prior_summary(blrmodel())
+    # intercept
+    intx <- seq(100,800,length = 1000)
+    inty <- dstudent_t(intx,df = 3,mu = 620,sigma = 118.6)
+    intdata <- data.frame(x = intx,y = inty)
+    combined1 <- ggplot() + 
+      geom_line(
+        data = intdata,
+        mapping = aes(x = x,y = y, colour = "Prior")
+      ) + 
+      geom_density(
+        data = postparas(),
+        mapping = aes(x = postparas()[,1], colour = "Posterior")
+      )
+    combined1all <- combined1 + 
+      geom_point(
+        mapping = aes(
+          x = c(quantile(postparas()[,1],probs = .025),
+                quantile(postparas()[,1],probs = .975)),
+          y = c(0,0)),
+        alpha = 0
+      ) + 
+      geom_errorbarh(
+        aes(
+          xmin = quantile(postparas()[,1],probs = .025),
+          xmax = quantile(postparas()[,1],probs = .975),
+          y = 0,
+          colour = "Credible region"),
+        height = 0.05*layer_scales(combined1)$y$get_limits()[2],
+        size = 1
+      ) + 
+      labs(
+        x = "Intercept", 
+        y = "Density",
+        alt = "The plot combined the prior distribution and the posterior plot"
+      ) + 
+      scale_x_continuous(expand = expansion(mult = 0)) +
+      scale_y_continuous(expand = expansion(mult = .05))+
+      scale_color_manual(
+        name = NULL,
+        values = c(
+          "Credible region" = psuPalette[1],
+          "Prior" = psuPalette[3],
+          "Posterior" = psuPalette[2]
+        )
+      ) + 
+      theme_bw() + 
+      theme(
+        plot.caption = element_text(size = 18),
+        text = element_text(size = 18),
+        axis.title = element_text(size = 16),
+        legend.position = "bottom"
+      )
+    # slope
+    slopex <- seq(-4,4,length = 1000)
+    slopey <- dnorm(slopex,mean = 0,sd = 10000)
+    slopedata <- data.frame(x = slopex,y = slopey)
+    combined2 <- ggplot()+
+      geom_line(
+        data = slopedata,
+        mapping = aes(x = x,y = y,colour = "Prior")
+      ) + 
+      geom_density(
+        data = postparas(),
+        mapping = aes(x = postparas()[,2], colour = "Posterior")
+      )
+    combined2all <- combined2 + 
+      geom_point(
+        mapping = aes(
+          x = c(quantile(postparas()[,2],probs = .025),
+                quantile(postparas()[,2],probs = .975)),
+          y = c(0,0)),
+        alpha = 0
+      ) + 
+      geom_errorbarh(
+        aes(
+          xmin = quantile(postparas()[,2],probs = .025),
+          xmax = quantile(postparas()[,2],probs = .975),
+          y = 0,
+          colour = "Credible region"),
+        height = 0.05*layer_scales(combined2)$y$get_limits()[2],
+        size = 1
+      ) + 
+      labs(
+        x = "Slope", 
+        y = "Density",
+        alt = "The plot combined the prior distribution and the posterior plot"
+      )+
+      scale_x_continuous(expand = expansion(mult = 0)) +
+      scale_y_continuous(expand = expansion(mult = .05))+
+      scale_color_manual(
+        name = NULL,
+        values = c(
+          "Credible region" = psuPalette[1],
+          "Prior" = psuPalette[3],
+          "Posterior" = psuPalette[2]
+        )
+      ) + 
+      theme_bw() + 
+      theme(
+        plot.caption = element_text(size = 18),
+        text = element_text(size = 18),
+        axis.title = element_text(size = 16),
+        legend.position = "bottom"
+      )
+    # sigma
+    sigmax <- seq(0,800,length = 1000)
+    sigmay <- dstudent_t(sigmax,df = 3,mu = 0,sigma = 118.6)
+    sigmadata <- data.frame(x = sigmax,y = sigmay)
+    combined3 <- ggplot() + 
+      geom_line(
+        data = sigmadata,
+        mapping = aes(x = x,y = y,colour = "Prior")
+      ) + 
+      geom_density(
+        data = postparas(),
+        mapping = aes(x = postparas()[,3],colour="Posterior")
+      )
+    combined3all <- combined3 + 
+      geom_point(
+        mapping = aes(
+          x = c(quantile(postparas()[,3],probs = .025),
+                quantile(postparas()[,3],probs = .975)),
+          y = c(0,0)),
+        alpha = 0
+      ) + 
+      geom_errorbarh(
+        aes(
+          xmin = quantile(postparas()[,3],probs = .025),
+          xmax = quantile(postparas()[,3],probs = .975),
+          y = 0,
+          colour = "Credible region"),
+        height = 0.05*layer_scales(combined3)$y$get_limits()[2],
+        size = 1
+      ) + 
+      labs(
+        x = "Sigma", 
+        y = "Density",
+        alt = "The plot combined the prior distribution and the posterior plot"
+      ) + 
+      scale_x_continuous(expand = expansion(mult = 0)) + 
+      scale_y_continuous(expand = expansion(mult = .05)) + 
+      scale_color_manual(
+        name = NULL,
+        values = c(
+          "Credible region" = psuPalette[1],
+          "Prior" = psuPalette[3],
+          "Posterior" = psuPalette[2]
+        )
+      ) + 
+      theme_bw() + 
+      theme(
+        plot.caption = element_text(size = 18),
+        text = element_text(size = 18),
+        axis.title = element_text(size = 16),
+        legend.position = "bottom"
+      )
+    all <- ggarrange(
+      combined1all,
+      combined2all,
+      combined3all,
+      ncol=2,
+      nrow=2,
+      common.legend = TRUE,
+      legend = "bottom")
+    allt <- annotate_figure(
+      p = all,
+      top = text_grob(
+        "Prior and Posterior",
+        color = "black", 
+        size = 22
+      )
+    )
+    return(allt)
+  }
+})
+
+### Click times----
+### the same sample selected each time
+clicktimes <- reactive(input$newsamplepreols+input$newsamplepreblr)
+
+## OLS Prediction----
+seeds3 <- reactiveValues(seedpre=0)
+observeEvent(
+  eventExpr = {
+    input$trainingsizepreols
+    ## the same sample selected each time
+    clicktimes()
+  },
+  handlerExpr = {
+    seeds3$seedpre <- seeds3$seedpre+1
+  }
+)
+sampleRpreols <- reactive(repeatable(sample,seed = seeds3$seedpre))
+##training data
+split2preols <- reactive(
+  sampleRpreols()(
+    1:nrow(satFull),
+    size=nrow(satFull)*input$trainingsizepreols,
+    replace = FALSE))
+trainpreols <- reactive(na.omit(satFull[split2preols(),]))
+testpreols <- reactive(na.omit(satFull[-split2preols(),]))
+## ols model
+olsmodelpre <- reactive(lm(SATQ~SATV,data = trainpreols()))
+## compare models:Mean Absolute Error
+output$maesols <- renderUI({
+  newdatamae <- data.frame(SATV = testpreols()[,1])
+  predictedmae <- predict(olsmodelpre(),newdata = newdatamae)
+  mae1 <- mae(actual = testpreols()[,2],predicted = predictedmae)
+  withMathJax(
+    p(tags$strong("Mean Absolute Error"),"for OLS = ", round(mae1,2))
+  )
+})
+output$olsfitpre <- renderPlot({
+  band <- if(input$olsbandpre == 1){
+    stat_smooth(
+      data=trainpreols(),
+      mapping = aes(x=SATV,y=SATQ),
+      method = "lm",
+      formula = y~x,
+      level = 0.95,
+      color = psuPalette[1]
+    )
+  }else{
+    stat_smooth(
+      data = trainpreols(),
+      mapping = aes(x=SATV,y=SATQ),
+      method = "lm",
+      formula = y~x,
+      se = FALSE,
+      color = psuPalette[1]
+    )
+  }
+  p <- ggplot()+
+    geom_point(
+      data = trainpreols(),
+      mapping = aes(x = SATV,y = SATQ),
+      colour = "black",
+      alpha = 0.5
+    )+
+    band+
+    labs(
+      title = "Ordinary Least Squares",
+      x = "SAT Verbal", 
+      y = "SAT Quantitative",
+      alt = "The plot shows the linear relationship between sat verbal scores 
+        and sat quantitative scores"
+    )+
+    theme_bw()+
+    theme(
+      plot.caption = element_text(size = 18),
+      text = element_text(size = 18),
+      axis.title = element_text(size = 16)
+    )
+  return(p)
+})
+
+output$olsparapre <- renderTable({
+  coeff <- coefficients(olsmodelpre())
+  c2 <- paste("95% Confidence interval"," lower bound",sep = "<br>")
+  c3 <- paste("95% Confidence interval"," upper bound",sep = "<br>")
+  ctable <- matrix(
+    c(coeff[1],confint(olsmodelpre())[1],confint(olsmodelpre())[3],
+      coeff[2],confint(olsmodelpre())[2],confint(olsmodelpre())[4]),
+    nrow = 2,
+    ncol = 3,
+    byrow = TRUE,
+    dimnames = list(c("Intercept","SAT Verbal"),c("Estimate",c2,c3)))
+},
+rownames = TRUE,
+bordered = TRUE,
+sanitize.text.function = identity)
+
+output$olsestimate <- renderPlot({
+  x <- input$xpointols
+  newdata <- data.frame(SATV = x)
+  df <- df.residual(olsmodelpre())
+  pointes <- predict(olsmodelpre(),newdata = newdata)
+  c <- (trainpreols()$SATV-mean(trainpreols()$SATV))^2
+  mse <- mean(summary(olsmodelpre())$residuals^2)
+  ci <- c(pointes+qt(0.025,df = df)*sqrt(mse*(1/nrow(trainpreols())+(x-mean(trainpreols()$SATV))^2/sum(c))),
+          pointes+qt(0.975,df = df)*sqrt(mse*(1/nrow(trainpreols())+(x-mean(trainpreols()$SATV))^2/sum(c))))
+  # all estimate 80%-90%
+  estimate <- NULL
+  estimatelist <- c()
+  range <- 0.005
+  rangechange <- (0.995-0.005)/1000
+  rangelist <- c()
+  while(range <= 0.995){
+    estimate <- pointes+qt(range,df = df)*sqrt(mse*(1/nrow(trainpreols())+(x-mean(trainpreols()$SATV))^2/sum(c)))
+    estimatelist <- c(estimatelist,estimate)
+    rangelist <- c(rangelist,range)
+    range <- range+rangechange}
+  estimatelist2 <- data.frame(x = estimatelist)
+  ##predition-avarage point
+  ave <- mean(trainpreols()$SATV)
+  newdata2 <- data.frame(SATV = ave)
+  pointesave <- predict(olsmodelpre(),newdata = newdata2)
+  # all estimate 80%-90%
+  estimateave <- NULL
+  estimatelistave <- c()
+  rangeave <- 0.005
+  rangechangeave <- (0.995-0.005)/1000
+  rangelistave <- c()
+  while(rangeave <= 0.995){
+    estimateave <- pointesave+qt(rangeave,df = df)*sqrt(mse*(1/nrow(trainpreols())+(ave-mean(trainpreols()$SATV))^2/sum(c)))
+    estimatelistave <- c(estimatelistave,estimateave)
+    rangelistave <- c(rangelistave,rangeave)
+    rangeave <- rangeave+rangechangeave}
+  estimatelistave2 <- data.frame(x = estimatelistave)
+  endpoints <- data.frame(x = c(ci[1],ci[2]),y = c(0,0))
+  p1 <- ggplot()+
+    geom_density(
+      trim = TRUE,
+      data = estimatelistave2,
+      mapping = aes(x = x,colour = "Average verbal"),
+      size = 1
+    )+
+    geom_density(
+      trim = TRUE,
+      data = estimatelist2,
+      mapping = aes(x = x,colour = "Verbal selected"),
+      size = 1
+    )+
+    ## 95%CI
+    geom_segment(
+      aes(x = ci[1],y = 0,xend = ci[2],yend = 0,colour = "Confidence interval"),
+      size = 1
+    )
+  p <- p1+
+    geom_point(
+      data = endpoints,
+      mapping = aes(x = x,y = y),
+      alpha = 0
+    )+
+    geom_errorbarh(
+      aes(xmin = ci[1],xmax = ci[2],y = 0,colour = "Confidence interval"),
+      height = 0.05*layer_scales(p1)$y$get_limits()[2],
+      size = 1
+    )+
+    labs(
+      title = paste0("OLS Prediction for Mean Verbal vs. Verbal = ",x),
+      subtitle = paste0(
+        "* Predicted values of SAT Quantitative when SAT Verbal = ",
+        round(mean(trainpreols()$SATV),1),
+        " vs. ",
+        x),
+      x = "Predicted SAT Quantitative Scores", 
+      y = "Density",
+      alt = "A plot for the point estimate"
+    )+
+    scale_color_manual(
+      name = NULL,
+      values = c(
+        "Average verbal" = "black",
+        "Verbal selected" = "blue",
+        "Confidence interval" = psuPalette[1]
+      )
+    )+
+    theme_bw()+
+    theme(
+      plot.caption = element_text(size = 18),
+      plot.subtitle = element_text(lineheight = 0.9,size = 16),
+      text = element_text(size = 18),
+      axis.title = element_text(size = 16),
+      legend.position = "bottom"
+    )
+  return(p)
+})
+## table
+output$tableols <- renderTable({
+  x <- input$xpointols
+  newdata <- data.frame(SATV = x)
+  df <- df.residual(olsmodelpre())
+  pointes <- predict(olsmodelpre(),newdata = newdata)
+  c <- (trainpreols()$SATV-mean(trainpreols()$SATV))^2
+  mse <- mean(summary(olsmodelpre())$residuals^2)
+  ci <- c(pointes+qt(0.025,df = df)*sqrt(mse*(1/nrow(trainpreols())+(x-mean(trainpreols()$SATV))^2/sum(c))),
+          pointes+qt(0.975,df = df)*sqrt(mse*(1/nrow(trainpreols())+(x-mean(trainpreols()$SATV))^2/sum(c))))
+  c1 <- paste("95% Confidence interval"," lower bound",sep = "<br>")
+  c2 <- paste("95% Confidence interval"," upper bound",sep = "<br>")
+  ctable <- matrix(c(round(ci[1],3),round(ci[2],3)),nrow = 1)
+  colnames(ctable) <- c(c1,c2)
+  ctable
+},
+bordered = TRUE,
+sanitize.text.function=identity)
+
+## BLR Prediction----
+## button click
+blrgoClick <- reactiveVal(0)
+observeEvent(
+  eventExpr = input$blrgo,
+  handlerExpr = {
+    blrgoClick(blrgoClick()+1)
+  }
+)
+## disabled start button
+observeEvent(
+  eventExpr = input$blrgo,
+  handlerExpr = {
+    updateButton(
+      session = session,
+      inputId = "blrgo",
+      disabled = TRUE
+    )
+  }
+)
+## update prior type
+observeEvent(
+  eventExpr = input$blrgo,
+  handlerExpr = {
+    updateSelectInput(
+      session = session,
+      inputId = "priortypepreblr",
+      choices = c(
+        "Default priors" = "defaultp",
+        "Informative priors" = "informp"
+      ),
+      selected = "defaultp"
+    )
+  }
+)
+seeds4 <- reactiveValues(seedpre=0)
+observeEvent(
+  eventExpr = {
+    input$trainingsizepreblr
+    ## same sample
+    clicktimes()
+  },
+  handlerExpr = {
+    seeds4$seedpre <- seeds4$seedpre+1
+  }
+)
+sampleRpreblr <- reactive(repeatable(sample,seed = seeds4$seedpre))
+##training data
+split2preblr <- reactive(
+  sampleRpreblr()(
+    1:nrow(satFull),
+    size=nrow(satFull)*input$trainingsizepreblr,
+    replace = FALSE))
+trainpreblr <- reactive(na.omit(satFull[split2preblr(),]))
+testpreblr <- reactive(na.omit(satFull[-split2preblr(),]))
+## bayesian model
+blrmodelpre <- reactive({
+  if(input$priortypepreblr == 'defaultp'){
+    blrmodel <- brm(SATQ~SATV,data = trainpreblr(),iter = 2000,chain = 1)
+  }
+  if(input$priortypepreblr == 'informp'){
+    stanvars <- stanvar(x = input$beta1mupreblr,name = "beta1mupreblr")+
+      stanvar(x = input$beta1sigmapreblr,name = "beta1sigmapreblr")+
+      stanvar(x = input$beta0mupreblr,name = "beta0mupreblr")+
+      stanvar(x = input$beta0sigmapreblr,name = "beta0sigmapreblr")+
+      stanvar(x = input$sigmaratepreblr, name = "sigmaratepreblr")
+    
+    priorset <- c(
+      prior(normal(beta1mupreblr,beta1sigmapreblr),class = b,coef = SATV),
+      prior(normal(beta0mupreblr,beta0sigmapreblr),class = Intercept),
+      prior(exponential(sigmaratepreblr),class = sigma))
+    
+    blrmodel <- brm(
+      formula = SATQ~SATV,
+      data = trainpreblr(),
+      prior = priorset,
+      iter = 2000,
+      chain = 1,
+      stanvars = stanvars)
+  }
+  return(blrmodel)
+})
+
+## compare models:Mean Absolute Error
+output$maesblr <- renderUI({
+  validate(
+    need(
+      blrgoClick() > 0,
+      "")
+  )
+  # blr
+  predictions <- brms::posterior_predict(blrmodelpre(),newdata = testpreblr())
+  means <- colMeans(predictions)
+  mae2 <- mean(abs(means-testpreblr()[,2]))
+  withMathJax(
+    p(tags$strong("Mean Absolute Error"),"for BLR = ", round(mae2,2))
+  )
+})
+## prediction--average point
+avepoint <- reactive(data.frame(SATV = mean(trainpreblr()$SATV)))
+avepredblr <- reactive(
+  as.data.frame(brms::posterior_linpred(blrmodelpre(),newdata = avepoint())))
+## prediction--new point
+newpoint <- reactive(data.frame(SATV = input$xpointblr))
+newpredblr <- reactive(
+  as.data.frame(brms::posterior_linpred(blrmodelpre(),newdata = newpoint())))
+## posterior
+postparaspre <- reactive(as.data.frame(blrmodelpre()))
+output$blrfitpre <- renderPlot({
+  validate(
+    need(
+      blrgoClick() > 0,
+      "It will take a little bit time to render, press Start button to trigger
+        the rendering")
+  )
+  newdata <- sample_n(postparaspre(),100)
+  ggplot()+
+    geom_point(
+      data = trainpreblr(),
+      mapping = aes(x = SATV,y = SATQ),
+      colour = "black",
+      alpha = 0.5
+    )+
+    geom_segment(
+      data = newdata,
+      mapping = aes(
+        x = min(trainpreblr()$SATV), 
+        xend = max(trainpreblr()$SATV),
+        y = newdata[,1] + newdata[,2]*min(trainpreblr()$SATV), 
+        yend = newdata[,1] + newdata[,2]*max(trainpreblr()$SATV)
+      ),
+      color = psuPalette[1],
+      alpha = 0.1
+    )+
+    labs(
+      title = "Bayesian Linear Regression",
+      subtitle = "* 100 regression lines sampled from posterior distributions",
+      x = "SAT Verbal", 
+      y = "SAT Quantitative",
+      alt = "The plot shows the linear relationship between sat verbal scores and sat quantitative scores"
+    )+
+    theme_bw()+
+    theme(
+      plot.caption = element_text(size = 18),
+      plot.subtitle = element_text(lineheight = 0.9,size = 16),
+      text = element_text(size = 18),
+      axis.title = element_text(size = 16),
+    )
+})
+
+output$blrparapre <- renderTable({
+  validate(
+    need(
+      blrgoClick() > 0,
+      "")
+  )
+  c2 <- paste("95% Credible interval"," lower bound",sep = "<br>")
+  c3 <- paste("95% Credible interval"," upper bound",sep = "<br>")
+  ctable <- matrix(
+    c(mean(postparaspre()[,1]),
+      quantile(postparaspre()[,1],probs = .025),
+      quantile(postparaspre()[,1],probs = .975),
+      mean(postparaspre()[,2]),
+      quantile(postparaspre()[,2],probs = .025),
+      quantile(postparaspre()[,2],probs = .975),
+      mean(postparaspre()[,3]),
+      quantile(postparaspre()[,3],probs = .025),
+      quantile(postparaspre()[,3],probs = .975)),
+    nrow = 3,
+    ncol = 3,
+    byrow = TRUE,
+    dimnames = list(c("Intercept","SAT Verbal","Sigma"),c("Mean",c2,c3)))
+},
+rownames = TRUE,
+bordered = TRUE,
+sanitize.text.function=identity)
+
+
+output$bayesestimate <- renderPlot({
+  validate(
+    need(
+      blrgoClick() > 0,
+      "It will take a little bit time to render, press Start button to trigger
+        the rendering")
+  )
+  ## 95% credible
+  valueci <- quantile(newpredblr()[,1], probs = c(.025,.975)) 
+  p1 <- ggplot()+
+    geom_density(
+      trim = TRUE,
+      data = avepredblr(),
+      mapping = aes(x = avepredblr()[,1],color = "Average verbal"),
+      size = 1
+    )+
+    geom_density(
+      trim = TRUE,
+      data = newpredblr(),
+      mapping = aes(x = newpredblr()[,1],color = "Verbal selected"),
+      size = 1
+    )+
+    ## 95%CI
+    geom_segment(
+      aes(
+        x = valueci[1],
+        y = 0,
+        xend = valueci[2],
+        yend = 0,
+        colour = "Credible interval"),
+      size = 1
+    )
+  p2 <- p1+
+    geom_point(
+      mapping = aes(x = c(valueci[1],valueci[2]),y = c(0,0)),
+      alpha = 0
+    )+
+    geom_errorbarh(
+      aes(xmin = valueci[1],xmax = valueci[2],y = 0,colour = "Credible interval"),
+      height = 0.05*layer_scales(p1)$y$get_limits()[2],
+      size = 1
+    )+
+    labs(
+      title = paste0(
+        "Bayesian Prediction for Mean Verbal vs. Verbal = ",
+        input$xpointblr),
+      subtitle = paste0(
+        "* Predicted values of SAT Quantitative when SAT Verbal = ",
+        round(mean(trainpreblr()$SATV),1),
+        " vs. ",
+        input$xpointblr),
+      x = "Predicted SAT Quantitative Scores", 
+      y = "Density",
+      alt = "A plot for the point estimate"
+    )+
+    scale_color_manual(
+      name = NULL,
+      values = c(
+        "Average verbal" = "black",
+        "Verbal selected" = "blue",
+        "Credible interval" = psuPalette[1]
+      )
+    )+
+    theme_bw()+
+    theme(
+      plot.caption = element_text(size = 18),
+      plot.subtitle = element_text(lineheight = 0.9, size = 16),
+      text = element_text(size = 18),
+      axis.title = element_text(size = 16),
+      legend.position = "bottom"
+    )
+  return(p2)
+})
+
+output$blrpriorOutputpre <- renderUI({
+  validate(
+    need(
+      blrgoClick() > 0,
+      ""),
+    need(
+      input$priortypepreblr == 'defaultp',
+      "")
+  )
+  pr <- prior_summary(blrmodelpre())
+  withMathJax(
+    paste0("Intercept~",pr$prior[3]),
+    br(),
+    paste0("Slope~Improper flat"),
+    br(),
+    paste0("Sigma~",pr$prior[4]),
+    br(),
+    paste0("Note: Student_t(df,\u03BC,\u03C3)")
+  )
+})
+
+output$tableblr <- renderTable({
+  validate(
+    need(
+      blrgoClick() > 0,
+      "")
+  )
+  # ci
+  ci <- quantile(newpredblr()[,1], probs = c(.025,.975)) 
+  c1 <- paste("95% Credible region"," lower bound",sep = "<br>")
+  c2 <- paste("95% Credible region"," upper bound",sep = "<br>")
+  ctable <- matrix(c(round(ci[1],3),round(ci[2],3)),nrow = 1)
+  colnames(ctable) <- c(c1,c2)
+  ctable
+},
+bordered = TRUE,
+sanitize.text.function = identity)
 
 }
 
