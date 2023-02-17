@@ -1,0 +1,7 @@
+# Things Needed for This Version
+1.Branch-jingdevelopment: Program with rstanarm package. Runs fast and without any errors. However, it cannot be successfully deployed, and you need to contact with R staff to solve the deployment problem. And the code format needs to be modified.
+2.Branch-jingdevelopmentBrms: Program with Brms package. It runs without errors but is very slow and cannot be published (it is not known whether it can be deployed). The code format has been modified. The long running time and publish failure need to be solved. 
+3.Make a pull request
+
+# Ideas for Future Development
+Consider allowing users to input custom data sets.
