@@ -9,13 +9,26 @@ library(dplyr)
 # library(rstanarm)
 library(Metrics)
 library(ggpubr)
-# Add On
-library(rstan)
-library(shinystan)
+## rstanarm imports
 library(bayesplot)
+library(lme4)
+library(loo)
+library(Matrix)
+library(nlme)
+library(rstan)
+library(rstantools)
+library(shinystan)
+library(survival)
+library(RcppParallel)
+library(StanHeaders)
+library(BH)
+library(Rcpp)
+library(RcppEigen)
 library(RcppParallel)
 
-# Test
+
+
+# # Test
 source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/as.matrix.stanreg.R")
 source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/bayes_R2.R")
 source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/data_block.R")
@@ -74,7 +87,7 @@ source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanreg-obj
 source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/stanreg_list.R")
 source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/R/zzz.R")
 
-
+source("https://raw.githubusercontent.com/stan-dev/rstanarm/master/tools/make_cc.R")
 
 prior_summary <- function(object, ...){
   UseMethod("prior_summary")
@@ -87,6 +100,8 @@ posterior_predict <- function(object, ...){
 posterior_linpred <- function(object, transform = FALSE, ...) {
   UseMethod("posterior_linpred")
 }
+
+
 # Define UI for App ----
 ui <- list(
   ## Create the app page ----
